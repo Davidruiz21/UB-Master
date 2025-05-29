@@ -35,16 +35,30 @@ if st.button("Obtener recomendación"):
     elif riesgo == "Algo cómodo": score += 1
     if horizonte >= 10: score += 1
 
-    # Clasificación
+    # Recomendaciones detalladas por perfil
     if score <= 1:
         perfil = "Conservador"
-        recomendacion = "70% renta fija, 20% ETFs de bajo riesgo, 10% efectivo"
+        recomendacion = (
+            "70% en bonos de gobiernos europeos AAA (ej. bonos alemanes a 10 años), "
+            "20% en ETFs de renta fija como iShares Euro Government Bond 1-3yr (bajo riesgo y baja comisión), "
+            "10% en efectivo para liquidez inmediata. Considera evitar mercados emergentes o criptoactivos por ahora."
+        )
     elif score == 2:
         perfil = "Moderado"
-        recomendacion = "50% renta fija, 30% ETFs diversificados, 20% renta variable"
+        recomendacion = (
+            "50% en bonos grado de inversión (por ejemplo, bonos corporativos europeos), "
+            "30% en ETFs globales como Vanguard FTSE All-World o iShares MSCI World (diversificación global y baja comisión), "
+            "10% en renta variable de grandes empresas como Nestlé, Apple, Microsoft, y 10% en oro o commodities para protección."
+        )
     else:
         perfil = "Agresivo"
-        recomendacion = "30% renta fija, 40% ETFs, 30% renta variable global"
+        recomendacion = (
+            "30% en renta fija (bonos high yield o bonos emergentes como los de India o Brasil), "
+            "30% en ETFs de alto rendimiento como ARK Innovation o QQQ, "
+            "20% en acciones individuales de crecimiento como Nvidia, Tesla, MercadoLibre, Adyen y ASML, "
+            "10% en criptoactivos líderes (BTC, ETH), "
+            "10% en Private Equity o REITs internacionales para diversificación adicional."
+        )
 
     st.success(f"🎯 Tu perfil es: **{perfil}**")
     st.info(f"📊 Recomendación sugerida: {recomendacion}")
