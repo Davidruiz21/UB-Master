@@ -35,32 +35,42 @@ if st.button("Obtener recomendación"):
     elif riesgo == "Algo cómodo": score += 1
     if horizonte >= 10: score += 1
 
-    # Recomendaciones detalladas por perfil
+    # Recomendaciones detalladas según perfil
     if score <= 1:
         perfil = "Conservador"
-        recomendacion = (
-            "70% en bonos de gobiernos europeos AAA (ej. bonos alemanes a 10 años), "
-            "20% en ETFs de renta fija como iShares Euro Government Bond 1-3yr (bajo riesgo y baja comisión), "
-            "10% en efectivo para liquidez inmediata. Considera evitar mercados emergentes o criptoactivos por ahora."
-        )
+        recomendacion = """
+        - **70% renta fija:** bonos del Estado de países desarrollados (ej. Bunds alemanes, bonos del Tesoro de EE. UU.).
+        - **20% ETFs de bajo riesgo:** como iShares Core Global Aggregate Bond (AGGG) o Vanguard Total Bond Market (BND).
+        - **10% efectivo o cuentas remuneradas.**
+        - **Asesor sugerido:** Consultar con un planificador financiero con certificación CFP® o EFPA.
+        """
     elif score == 2:
         perfil = "Moderado"
-        recomendacion = (
-            "50% en bonos grado de inversión (por ejemplo, bonos corporativos europeos), "
-            "30% en ETFs globales como Vanguard FTSE All-World o iShares MSCI World (diversificación global y baja comisión), "
-            "10% en renta variable de grandes empresas como Nestlé, Apple, Microsoft, y 10% en oro o commodities para protección."
-        )
+        recomendacion = """
+        - **50% renta fija:** incluir bonos corporativos de grado de inversión.
+        - **30% ETFs diversificados:** como Vanguard FTSE All-World (VWRL) o iShares MSCI World.
+        - **20% renta variable:** acciones estables como Nestlé, Johnson & Johnson, Unilever.
+        - **Exposición sugerida:** 70% en países desarrollados (EE.UU., Europa) y 30% en emergentes (India, Brasil).
+        - **Asesor sugerido:** Profesional con certificación EFPA o CFA.
+        """
     else:
         perfil = "Agresivo"
-        recomendacion = (
-            "30% en renta fija (bonos high yield o bonos emergentes como los de India o Brasil), "
-            "30% en ETFs de alto rendimiento como ARK Innovation o QQQ, "
-            "20% en acciones individuales de crecimiento como Nvidia, Tesla, MercadoLibre, Adyen y ASML, "
-            "10% en criptoactivos líderes (BTC, ETH), "
-            "10% en Private Equity o REITs internacionales para diversificación adicional."
-        )
+        recomendacion = """
+        - **30% renta fija:** bonos de alto rendimiento (high yield).
+        - **40% ETFs globales:** ARK Innovation ETF (ARKK), SPDR MSCI ACWI.
+        - **30% renta variable:** acciones como Nvidia, Tesla, MercadoLibre, Sea Ltd, ASML.
+        - **Otros activos:** exposición a criptoactivos (BTC, ETH), commodities (oro, litio) y fondos de private equity si están disponibles.
+        - **Exposición sugerida:** balance entre EE. UU., Europa, Asia y LATAM.
+        - **Asesor sugerido:** CFA Charterholder o asesor certificado FINRA Series 7/63 si se opera en EE. UU.
+        """
 
     st.success(f"🎯 Tu perfil es: **{perfil}**")
-    st.info(f"📊 Recomendación sugerida: {recomendacion}")
+    st.markdown("📊 **Recomendación sugerida:**")
+    st.markdown(recomendacion)
 
     feedback = st.radio("¿Te ha sido útil esta recomendación?", ["Sí", "No", "Parcialmente"])
+
+    # Mensaje de privacidad
+    st.markdown("---")
+    st.markdown("🔒 **Privacidad y seguridad de tus datos**")
+    st.markdown("Esta interacción es completamente anónima y no se guarda ningún dato ingresado. No existe trazabilidad posterior ni almacenamiento de información personal, lo que reduce significativamente los riesgos asociados al manejo de datos sensibles.")
