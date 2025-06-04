@@ -1,17 +1,6 @@
 import streamlit as st
 
-st.title("🧠 Asesor Financiero Virtual - Demo")
-
-# Sección de brokers
-st.markdown("### 🔗 Brokers recomendados para empezar a invertir")
-
-brokers = {
-    "Degiro": "https://www.degiro.es",
-    "eToro": "https://www.etoro.com",
-    "Interactive Brokers": "https://www.interactivebrokers.com",
-    "Revolut": "https://www.revolut.com",
-    "Trade Republic": "https://traderepublic.com"
-}
+st.title("🧠 Asesor Financiero Virtual - Famil.ia")
 
 for nombre, url in brokers.items():
     st.markdown(f"- [{nombre}]({url})", unsafe_allow_html=True)
@@ -74,3 +63,14 @@ if st.button("Obtener recomendación"):
     st.markdown("---")
     st.markdown("🔒 **Privacidad y seguridad de tus datos**")
     st.markdown("Esta interacción es completamente anónima y no se guarda ningún dato ingresado. No existe trazabilidad posterior ni almacenamiento de información personal, lo que reduce significativamente los riesgos asociados al manejo de datos sensibles.")
+
+# Sección de brokers
+st.markdown("### 🔗 Brokers recomendados para empezar a invertir")
+
+brokers = {
+    "Degiro": "https://www.degiro.es",
+    "eToro": "https://www.etoro.com",
+    "Interactive Brokers": "https://www.interactivebrokers.com",
+    "Revolut": "https://www.revolut.com",
+    "Trade Republic": "https://traderepublic.com"
+}
