@@ -1,98 +1,93 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import time
 
-st.set_page_config(page_title="Asesor Financiero Virtual", layout="centered")
+# Inicializar tiempo de inicio y paso
+if 'start_time' not in st.session_state:
+    st.session_state['start_time'] = time.time()
 
-st.title("🧠 Asesor Financiero Virtual")
-st.markdown("Bienvenido a tu asesor personalizado. Esta herramienta te ayudará a evaluar tu diversificación actual y te propondrá una estrategia profesional para redistribuir tu patrimonio.")
+if 'step' not in st.session_state:
+    st.session_state['step'] = 0
 
-# Consentimiento
-if not st.session_state.get("consent_given", False):
-    consent = st.checkbox("Acepto que mis datos sean usados de forma anónima y temporal")
-    if consent:
-        st.session_state["consent_given"] = True
-    else:
-        st.stop()
+# Función para mostrar progreso
+def update_progress():
+    progress = int((st.session_state['step'] / 8) * 100)
+    st.progress(progress)
 
-st.header("1. Tu situación actual")
-efectivo = st.number_input("¿Cuánto tienes en efectivo o cuentas bancarias (€)?", min_value=0)
-inmuebles = st.number_input("¿Valor estimado de tus inmuebles (€)?", min_value=0)
-vehiculos = st.number_input("¿Valor estimado de tus vehículos (€)?", min_value=0)
-bolsa = st.number_input("¿Cuánto tienes invertido en bolsa u otros productos financieros (€)?", min_value=0)
-otros = st.number_input("¿Cuánto tienes en otros activos (cripto, arte, negocios, etc.) (€)?", min_value=0)
+st.title("Asesor Financiero Virtual")
+st.write("Bienvenido. Esta herramienta te ayudará a comprender cómo diversificar tu patrimonio.")
 
-st.header("2. Perfil financiero")
-edad = st.slider("Edad", 18, 100, 30)
-ingresos = st.number_input("Ingresos mensuales (€)", min_value=0)
-riesgo = st.selectbox("Nivel de tolerancia al riesgo", ["Bajo", "Medio", "Alto"])
-horizonte = st.slider("¿Por cuántos años planeas mantener esta inversión?", 1, 30, 10)
-
-# Cálculo de patrimonio total
-patrimonio_total = efectivo + inmuebles + vehiculos + bolsa + otros
-
-if patrimonio_total == 0:
-    st.warning("Por favor, ingresa al menos un valor para calcular tu patrimonio.")
+# Paso 1: Consentimiento
+st.session_state['step'] = 1
+update_progress()
+if not st.checkbox("Acepto que esta herramienta es solo educativa y no constituye asesoramiento financiero profesional."):
     st.stop()
 
-st.subheader("🔎 Diagnóstico de diversificación actual")
+# Paso 2: Patrimonio
+st.session_state['step'] = 2
+update_progress()
+efectivo = st.number_input("Efectivo (€)", min_value=0)
+inmuebles = st.number_input("Inmuebles (€)", min_value=0)
+vehiculos = st.number_input("Vehículos (€)", min_value=0)
+bolsa = st.number_input("Bolsa (€)", min_value=0)
+otros = st.number_input("Otros activos (€)", min_value=0)
 
-comentarios = []
-if inmuebles / patrimonio_total > 0.6:
-    comentarios.append("Tienes una alta concentración en inmuebles. Considera diversificar hacia activos más líquidos.")
-if vehiculos / patrimonio_total > 0.3:
-    comentarios.append("Tienes una proporción alta en vehículos, los cuales se deprecian con el tiempo.")
-if bolsa / patrimonio_total < 0.1:
-    comentarios.append("Tienes poca exposición a activos financieros con potencial de crecimiento.")
+# Paso 3: Perfil personal
+st.session_state['step'] = 3
+update_progress()
+edad = st.number_input("Edad", min_value=18, max_value=100)
+ingresos = st.number_input("Ingresos mensuales (€)", min_value=0)
+riesgo = st.selectbox("Nivel de riesgo", ["Conservador", "Moderado", "Agresivo"])
+horizonte = st.selectbox("Horizonte temporal de inversión", ["Corto plazo", "Medio plazo", "Largo plazo"])
 
-if not comentarios:
-    st.success("Tu portafolio muestra una buena diversificación inicial.")
-else:
-    for c in comentarios:
-        st.warning(c)
+# Paso 4: Calcular patrimonio
+st.session_state['step'] = 4
+update_progress()
+patrimonio_total = efectivo + inmuebles + vehiculos + bolsa + otros
+st.write(f"Tu patrimonio neto total es de: €{patrimonio_total:,.2f}")
 
-st.header("3. Recomendación de distribución")
+# Paso 5: Evaluación de diversificación
+st.session_state['step'] = 5
+update_progress()
+if inmuebles > 0.6 * patrimonio_total:
+    st.warning("Estás muy expuesto al sector inmobiliario. Considera diversificar más tus inversiones.")
 
-# Reglas por perfil
-if riesgo == "Bajo":
-    distribucion = {
-        "Renta fija": 0.50,
-        "Renta variable": 0.15,
-        "Real estate": 0.15,
-        "Liquidez": 0.15,
-        "Alternativos": 0.05
-    }
-elif riesgo == "Medio":
-    distribucion = {
-        "Renta fija": 0.30,
-        "Renta variable": 0.30,
-        "Real estate": 0.15,
-        "Liquidez": 0.10,
-        "Alternativos": 0.10,
-        "Cripto": 0.05
-    }
-else:  # Alto
-    distribucion = {
-        "Renta fija": 0.15,
-        "Renta variable": 0.40,
-        "Real estate": 0.10,
-        "Liquidez": 0.05,
-        "Alternativos": 0.15,
-        "Cripto": 0.15
-    }
+# Paso 6: Recomendación
+st.session_state['step'] = 6
+update_progress()
 
-labels = list(distribucion.keys())
-percentages = [v for v in distribucion.values()]
-amounts = [v * patrimonio_total for v in distribucion.values()]
+def asignar_porcentaje(riesgo, horizonte):
+    if riesgo == "Conservador":
+        return [10, 50, 30, 0, 5, 5, 0]
+    elif riesgo == "Moderado":
+        return [20, 35, 20, 5, 10, 5, 5]
+    else:  # Agresivo
+        return [35, 20, 10, 10, 10, 10, 5]
 
-# Mostrar tabla de recomendación
-st.subheader("💼 Asignación recomendada:")
-for i in range(len(labels)):
-    st.markdown(f"- **{labels[i]}**: {percentages[i]*100:.0f}% → {amounts[i]:,.2f} €")
+etiquetas = ["Acciones", "Bonos", "Liquidez", "Cripto", "Commodities", "Inversiones alternativas", "ETFs temáticos"]
+porcentajes = asignar_porcentaje(riesgo, horizonte)
+valores = [round((p/100) * patrimonio_total, 2) for p in porcentajes]
 
-# Gráfico
+# Mostrar gráfico
 fig, ax = plt.subplots()
-ax.pie(percentages, labels=labels, autopct='%1.1f%%', startangle=90)
-ax.axis('equal')
+ax.pie(porcentajes, labels=etiquetas, autopct='%1.1f%%')
 st.pyplot(fig)
 
-st.info("Esta recomendación es orientativa y educativa. Para decisiones reales, consulta con un asesor financiero certificado.")
+# Mostrar desglose
+st.write("### Recomendación personalizada:")
+for e, p, v in zip(etiquetas, porcentajes, valores):
+    st.write(f"- {e}: {p}% → €{v:,.2f}")
+
+# Paso 7: Evaluación del usuario
+st.session_state['step'] = 7
+update_progress()
+satisfaccion = st.slider("¿Qué tan útil te resultó esta herramienta?", 1, 10)
+comentarios = st.text_area("¿Comentarios o sugerencias?")
+
+# Paso 8: Finalizar y mostrar duración
+st.session_state['step'] = 8
+update_progress()
+end_time = time.time()
+duration = round(end_time - st.session_state['start_time'], 2)
+st.success(f"Has completado el análisis en {duration} segundos.")
+
