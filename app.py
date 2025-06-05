@@ -1,95 +1,118 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Asesor Financiero Virtual", page_icon="🧠")
+# Inicializar estados
+if "pagina" not in st.session_state:
+    st.session_state.pagina = "consentimiento"
+if "contador" not in st.session_state:
+    st.session_state.contador = 0
 
-st.title("🧠 Asesor Financiero Virtual - Demo")
+# Función para calcular el perfil
+def calcular_perfil(edad, ingresos, riesgo, horizonte):
+    score = 0
 
-# Pantalla de consentimiento previo
-st.markdown("### 🔒 Consentimiento informado")
-st.markdown("""
-Antes de continuar, por favor acepta el siguiente aviso:
+    # Edad
+    if edad < 30:
+        score += 2
+    elif edad < 50:
+        score += 1
 
-> Esta herramienta es una demo de asesoramiento financiero automatizado. Toda la información que proporciones será procesada de forma **local y temporal**, sin ser almacenada ni vinculada a tu identidad. No se realiza ningún tipo de trazabilidad posterior ni análisis de comportamiento personal. Tu privacidad está completamente protegida.
+    # Ingresos
+    if ingresos == "<1000":
+        score += 0
+    elif ingresos == "1000-3000":
+        score += 1
+    elif ingresos == "3000-6000":
+        score += 2
+    else:
+        score += 3
 
-Para continuar, debes autorizar el tratamiento temporal y anónimo de los datos ingresados.
-""")
+    # Riesgo
+    if riesgo == "Bajo":
+        score += 0
+    elif riesgo == "Medio":
+        score += 2
+    else:
+        score += 4
 
-consentimiento = st.checkbox("Autorizo el tratamiento temporal y anónimo de los datos ingresados.")
+    # Horizonte temporal
+    if horizonte < 3:
+        score += 0
+    elif horizonte < 10:
+        score += 2
+    else:
+        score += 4
 
-if consentimiento:
-    if st.button("Continuar al asesor financiero"):
-        st.session_state.autorizado = True
+    # Clasificación
+    if score <= 5:
+        return "Conservador"
+    elif score <= 10:
+        return "Moderado"
+    else:
+        return "Agresivo"
 
-# Mostrar encuesta solo si ya aceptó el consentimiento
-if st.session_state.get("autorizado", False):
+# Función para mostrar recomendación
+def generar_recomendacion(perfil):
+    st.subheader("📊 Recomendación de inversión:")
 
-    st.markdown("### 🔗 Brokers recomendados para empezar a invertir")
-    brokers = {
-        "Degiro": "https://www.degiro.es",
-        "eToro": "https://www.etoro.com",
-        "Interactive Brokers": "https://www.interactivebrokers.com",
-        "Revolut": "https://www.revolut.com",
-        "Trade Republic": "https://traderepublic.com"
-    }
+    if perfil == "Conservador":
+        asignacion = {"Bonos": 70, "Acciones": 20, "Liquidez": 10}
+    elif perfil == "Moderado":
+        asignacion = {"Bonos": 40, "Acciones": 50, "Liquidez": 10}
+    else:
+        asignacion = {"Bonos": 20, "Acciones": 75, "Liquidez": 5}
 
-    for nombre, url in brokers.items():
-        st.markdown(f"- [{nombre}]({url})", unsafe_allow_html=True)
+    # Mostrar texto
+    st.write(f"Perfil detectado: **{perfil}**")
+    st.write("Asignación recomendada:")
+    for k, v in asignacion.items():
+        st.write(f"- {k}: {v}%")
 
-    st.markdown("---")
-    st.markdown("Responde estas preguntas para obtener una recomendación de inversión personalizada.")
+    # Mostrar gráfico
+    fig, ax = plt.subplots()
+    ax.pie(asignacion.values(), labels=asignacion.keys(), autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    st.pyplot(fig)
 
-    # Entradas del usuario
-    edad = st.number_input("¿Cuál es tu edad?", min_value=18, max_value=100)
-    ingresos = st.selectbox("¿Cuál es tu nivel de ingresos mensuales?",
-                            ["< 1000€", "1000€ - 3000€", "3000€ - 6000€", "> 6000€"])
-    riesgo = st.radio("¿Qué tan cómodo/a te sientes asumiendo riesgos en tus inversiones?",
-                      ["Nada cómodo", "Algo cómodo", "Muy cómodo"])
-    horizonte = st.slider("¿En cuántos años esperas usar este dinero?", 1, 30, 5)
+    # Enlaces útiles
+    st.markdown("🔗 Puedes explorar plataformas como [Indexa Capital](https://indexacapital.com), [MyInvestor](https://myinvestor.es) o [Raisin](https://www.raisin.es/) para empezar.")
+
+# PÁGINA DE CONSENTIMIENTO
+if st.session_state.pagina == "consentimiento":
+    st.title("Asesor Financiero Virtual")
+    st.markdown("Esta herramienta educativa te dará una recomendación de inversión personalizada en función de tu perfil.")
+    st.info("❗ Esta aplicación no almacena datos y no sustituye asesoría financiera profesional.")
+    
+    consentimiento = st.checkbox("He leído y acepto el tratamiento temporal y anónimo de mis datos.")
+    
+    if consentimiento:
+        if st.button("Continuar"):
+            st.session_state.pagina = "formulario"
+    else:
+        st.warning("Debes aceptar el consentimiento para continuar.")
+
+# PÁGINA DEL FORMULARIO Y RESULTADO
+elif st.session_state.pagina == "formulario":
+    st.header("📝 Cuestionario de perfil financiero")
+
+    edad = st.number_input("¿Cuál es tu edad?", min_value=18, max_value=100, step=1)
+    ingresos = st.selectbox("¿Cuál es tu nivel de ingresos mensuales?", options=["<1000", "1000-3000", "3000-6000", ">6000"])
+    riesgo = st.selectbox("¿Qué nivel de riesgo estás dispuesto/a a asumir?", options=["Bajo", "Medio", "Alto"])
+    horizonte = st.slider("¿Cuántos años piensas mantener tu inversión?", min_value=1, max_value=30, value=5)
 
     if st.button("Obtener recomendación"):
-        # Lógica de perfilamiento simple
-        score = 0
-        if ingresos in ["3000€ - 6000€", "> 6000€"]: score += 1
-        if riesgo == "Muy cómodo": score += 2
-        elif riesgo == "Algo cómodo": score += 1
-        if horizonte >= 10: score += 1
+        perfil = calcular_perfil(edad, ingresos, riesgo, horizonte)
+        generar_recomendacion(perfil)
 
-        # Recomendaciones detalladas según perfil
-        if score <= 1:
-            perfil = "Conservador"
-            recomendacion = """
-            - **70% renta fija:** bonos del Estado de países desarrollados (ej. Bunds alemanes, bonos del Tesoro de EE. UU.).
-            - **20% ETFs de bajo riesgo:** como iShares Core Global Aggregate Bond (AGGG) o Vanguard Total Bond Market (BND).
-            - **10% efectivo o cuentas remuneradas.**
-            - **Asesor sugerido:** Consultar con un planificador financiero con certificación CFP® o EFPA.
-            """
-        elif score == 2:
-            perfil = "Moderado"
-            recomendacion = """
-            - **50% renta fija:** incluir bonos corporativos de grado de inversión.
-            - **30% ETFs diversificados:** como Vanguard FTSE All-World (VWRL) o iShares MSCI World.
-            - **20% renta variable:** acciones estables como Nestlé, Johnson & Johnson, Unilever.
-            - **Exposición sugerida:** 70% en países desarrollados (EE.UU., Europa) y 30% en emergentes (India, Brasil).
-            - **Asesor sugerido:** Profesional con certificación EFPA o CFA.
-            """
+        st.session_state.contador += 1
+        st.success(f"Esta herramienta ha sido usada {st.session_state.contador} veces en esta sesión.")
+
+        utilidad = st.radio("¿Te ha sido útil esta recomendación?", ["Sí", "No"])
+        if utilidad == "Sí":
+            st.balloons()
         else:
-            perfil = "Agresivo"
-            recomendacion = """
-            - **30% renta fija:** bonos de alto rendimiento (high yield).
-            - **40% ETFs globales:** ARK Innovation ETF (ARKK), SPDR MSCI ACWI.
-            - **30% renta variable:** acciones como Nvidia, Tesla, MercadoLibre, Sea Ltd, ASML.
-            - **Otros activos:** exposición a criptoactivos (BTC, ETH), commodities (oro, litio) y fondos de private equity si están disponibles.
-            - **Exposición sugerida:** balance entre EE. UU., Europa, Asia y LATAM.
-            - **Asesor sugerido:** CFA Charterholder o asesor certificado FINRA Series 7/63 si se opera en EE. UU.
-            """
+            st.write("Gracias por tu retroalimentación. Seguiremos mejorando.")
 
-        st.success(f"🎯 Tu perfil es: **{perfil}**")
-        st.markdown("📊 **Recomendación sugerida:**")
-        st.markdown(recomendacion)
-
-        feedback = st.radio("¿Te ha sido útil esta recomendación?", ["Sí", "No", "Parcialmente"])
-
-        # Mensaje de privacidad
-        st.markdown("---")
-        st.markdown("🔐 **Privacidad y seguridad de tus datos**")
-        st.markdown("Esta interacción es completamente anónima y no se guarda ningún dato ingresado. No existe trazabilidad posterior ni almacenamiento de información personal, lo que reduce significativamente los riesgos asociados al manejo de datos sensibles.")
+    # Botón de reinicio opcional
+    if st.button("Volver al inicio"):
+        st.session_state.pagina = "consentimiento"
