@@ -1,119 +1,99 @@
-
 import streamlit as st
 import matplotlib.pyplot as plt
 
-# Inicializar estados
-if "pagina" not in st.session_state:
-    st.session_state.pagina = "consentimiento"
-if "contador" not in st.session_state:
-    st.session_state.contador = 0
+st.set_page_config(page_title="Asesor Financiero Virtual", layout="centered")
 
-# Función para calcular el perfil
-def calcular_perfil(edad, ingresos, riesgo, horizonte):
-    score = 0
+st.title("🧠 Asesor Financiero Virtual")
+st.markdown("Bienvenido a tu asesor personalizado. Esta herramienta te ayudará a evaluar tu diversificación actual y te propondrá una estrategia profesional para redistribuir tu patrimonio.")
 
-    # Edad
-    if edad < 30:
-        score += 2
-    elif edad < 50:
-        score += 1
-
-    # Ingresos
-    if ingresos == "<1000":
-        score += 0
-    elif ingresos == "1000-3000":
-        score += 1
-    elif ingresos == "3000-6000":
-        score += 2
+# Consentimiento
+if not st.session_state.get("consent_given", False):
+    consent = st.checkbox("Acepto que mis datos sean usados de forma anónima y temporal")
+    if consent:
+        st.session_state["consent_given"] = True
     else:
-        score += 3
+        st.stop()
 
-    # Riesgo
-    if riesgo == "Bajo":
-        score += 0
-    elif riesgo == "Medio":
-        score += 2
-    else:
-        score += 4
+st.header("1. Tu situación actual")
+efectivo = st.number_input("¿Cuánto tienes en efectivo o cuentas bancarias (€)?", min_value=0)
+inmuebles = st.number_input("¿Valor estimado de tus inmuebles (€)?", min_value=0)
+vehiculos = st.number_input("¿Valor estimado de tus vehículos (€)?", min_value=0)
+bolsa = st.number_input("¿Cuánto tienes invertido en bolsa u otros productos financieros (€)?", min_value=0)
+otros = st.number_input("¿Cuánto tienes en otros activos (cripto, arte, negocios, etc.) (€)?", min_value=0)
 
-    # Horizonte temporal
-    if horizonte < 3:
-        score += 0
-    elif horizonte < 10:
-        score += 2
-    else:
-        score += 4
+st.header("2. Perfil financiero")
+edad = st.slider("Edad", 18, 100, 30)
+ingresos = st.number_input("Ingresos mensuales (€)", min_value=0)
+riesgo = st.selectbox("Nivel de tolerancia al riesgo", ["Bajo", "Medio", "Alto"])
+horizonte = st.slider("¿Por cuántos años planeas mantener esta inversión?", 1, 30, 10)
 
-    # Clasificación
-    if score <= 5:
-        return "Conservador"
-    elif score <= 10:
-        return "Moderado"
-    else:
-        return "Agresivo"
+# Cálculo de patrimonio total
+patrimonio_total = efectivo + inmuebles + vehiculos + bolsa + otros
 
-# Función para mostrar recomendación
-def generar_recomendacion(perfil):
-    st.subheader("📊 Recomendación de inversión:")
+if patrimonio_total == 0:
+    st.warning("Por favor, ingresa al menos un valor para calcular tu patrimonio.")
+    st.stop()
 
-    if perfil == "Conservador":
-        asignacion = {"Bonos": 70, "Acciones": 20, "Liquidez": 10}
-    elif perfil == "Moderado":
-        asignacion = {"Bonos": 40, "Acciones": 50, "Liquidez": 10}
-    else:
-        asignacion = {"Bonos": 20, "Acciones": 75, "Liquidez": 5}
+st.subheader("🔎 Diagnóstico de diversificación actual")
 
-    # Mostrar texto
-    st.write(f"Perfil detectado: **{perfil}**")
-    st.write("Asignación recomendada:")
-    for k, v in asignacion.items():
-        st.write(f"- {k}: {v}%")
+comentarios = []
+if inmuebles / patrimonio_total > 0.6:
+    comentarios.append("Tienes una alta concentración en inmuebles. Considera diversificar hacia activos más líquidos.")
+if vehiculos / patrimonio_total > 0.3:
+    comentarios.append("Tienes una proporción alta en vehículos, los cuales se deprecian con el tiempo.")
+if bolsa / patrimonio_total < 0.1:
+    comentarios.append("Tienes poca exposición a activos financieros con potencial de crecimiento.")
 
-    # Mostrar gráfico
-    fig, ax = plt.subplots()
-    ax.pie(asignacion.values(), labels=asignacion.keys(), autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')
-    st.pyplot(fig)
+if not comentarios:
+    st.success("Tu portafolio muestra una buena diversificación inicial.")
+else:
+    for c in comentarios:
+        st.warning(c)
 
-    # Enlaces útiles
-    st.markdown("🔗 Puedes explorar plataformas como [Indexa Capital](https://indexacapital.com), [MyInvestor](https://myinvestor.es) o [Raisin](https://www.raisin.es/) para empezar.")
+st.header("3. Recomendación de distribución")
 
-# PÁGINA DE CONSENTIMIENTO
-if st.session_state.pagina == "consentimiento":
-    st.title("Asesor Financiero Virtual")
-    st.markdown("Esta herramienta educativa te dará una recomendación de inversión personalizada en función de tu perfil.")
-    st.info("❗ Esta aplicación no almacena datos y no sustituye asesoría financiera profesional.")
-    
-    consentimiento = st.checkbox("He leído y acepto el tratamiento temporal y anónimo de mis datos.")
-    
-    if consentimiento:
-        if st.button("Continuar"):
-            st.session_state.pagina = "formulario"
-    else:
-        st.warning("Debes aceptar el consentimiento para continuar.")
+# Reglas por perfil
+if riesgo == "Bajo":
+    distribucion = {
+        "Renta fija": 0.50,
+        "Renta variable": 0.15,
+        "Real estate": 0.15,
+        "Liquidez": 0.15,
+        "Alternativos": 0.05
+    }
+elif riesgo == "Medio":
+    distribucion = {
+        "Renta fija": 0.30,
+        "Renta variable": 0.30,
+        "Real estate": 0.15,
+        "Liquidez": 0.10,
+        "Alternativos": 0.10,
+        "Cripto": 0.05
+    }
+else:  # Alto
+    distribucion = {
+        "Renta fija": 0.15,
+        "Renta variable": 0.40,
+        "Real estate": 0.10,
+        "Liquidez": 0.05,
+        "Alternativos": 0.15,
+        "Cripto": 0.15
+    }
 
-# PÁGINA DEL FORMULARIO Y RESULTADO
-elif st.session_state.pagina == "formulario":
-    st.header("📝 Cuestionario de perfil financiero")
+labels = list(distribucion.keys())
+percentages = [v for v in distribucion.values()]
+amounts = [v * patrimonio_total for v in distribucion.values()]
 
-    edad = st.number_input("¿Cuál es tu edad?", min_value=18, max_value=100, step=1)
-    ingresos = st.selectbox("¿Cuál es tu nivel de ingresos mensuales?", options=["<1000", "1000-3000", "3000-6000", ">6000"])
-    riesgo = st.selectbox("¿Qué nivel de riesgo estás dispuesto/a a asumir?", options=["Bajo", "Medio", "Alto"])
-    horizonte = st.slider("¿Cuántos años piensas mantener tu inversión?", min_value=1, max_value=30, value=5)
+# Mostrar tabla de recomendación
+st.subheader("💼 Asignación recomendada:")
+for i in range(len(labels)):
+    st.markdown(f"- **{labels[i]}**: {percentages[i]*100:.0f}% → {amounts[i]:,.2f} €")
 
-    if st.button("Obtener recomendación"):
-        perfil = calcular_perfil(edad, ingresos, riesgo, horizonte)
-        generar_recomendacion(perfil)
+# Gráfico
+fig, ax = plt.subplots()
+ax.pie(percentages, labels=labels, autopct='%1.1f%%', startangle=90)
+ax.axis('equal')
+st.pyplot(fig)
 
-        st.session_state.contador += 1
-        st.success(f"Esta herramienta ha sido usada {st.session_state.contador} veces en esta sesión.")
+st.info("Esta recomendación es orientativa y educativa. Para decisiones reales, consulta con un asesor financiero certificado.")
 
-        utilidad = st.radio("¿Te ha sido útil esta recomendación?", ["Sí", "No"])
-        if utilidad == "Sí":
-            st.balloons()
-        else:
-            st.write("Gracias por tu retroalimentación. Seguiremos mejorando.")
-
-    # Botón de reinicio opcional
-    if st.button("Volver al inicio"):
-        st.session_state.pagina = "consentimiento"
