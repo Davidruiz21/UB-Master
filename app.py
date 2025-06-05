@@ -96,4 +96,3 @@ ax.axis('equal')
 st.pyplot(fig)
 
 st.info("Esta recomendación es orientativa y educativa. Para decisiones reales, consulta con un asesor financiero certificado.")
-
